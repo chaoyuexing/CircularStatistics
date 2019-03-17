@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="Circle">
-        <attr name="circle_color" format="color"/>
-        <attr name="text_Size" format="dimension" />
-        <attr name="text" format="string" />
-        <attr name="arc_Color" format="color" />
-        <attr name="text_Color" format="color" />
-        <attr name="start_Angle" format="integer" />
-        <attr name="sweep_Angle" format="integer" />
+        <attr name="circle_size" format="dimension"/>
     </declare-styleable>
 
 

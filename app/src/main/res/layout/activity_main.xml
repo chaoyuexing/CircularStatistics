@@ -8,15 +8,20 @@
 
     <com.view.Circle
         android:id="@+id/mCircle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:circle_color= "#165"
-        app:text="林志玲"
-        app:arc_Color="#FF07F21E"
-        app:start_Angle="0"
-        app:sweep_Angle="180"
-        app:text_Color="#000000"
-        app:text_Size="12sp"/>
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:paddingTop="20dp"
+        app:circle_size="20dp"
+        android:clickable="true"/>
+
+        <!--app:circle_color= "#165"-->
+        <!--app:text="林志玲"-->
+
+        <!--app:arc_Color="#FF07F21E"-->
+        <!--app:start_Angle="0"-->
+        <!--app:sweep_Angle="180"-->
+        <!--app:text_Color="#000000"-->
+        <!--app:text_Size="12sp"/>-->
 
     <!--<com.view.VolumeView-->
         <!--android:layout_width="80dp"-->
