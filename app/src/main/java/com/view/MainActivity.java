@@ -35,12 +35,12 @@ public class MainActivity extends AppCompatActivity {
         mCircle = findViewById(R.id.mCircle);
         baifenbi.add(40);
         baifenbi.add(30);
-        baifenbi.add(20);
-        baifenbi.add(10);
+//        baifenbi.add(20);
+//        baifenbi.add(10);
         colors.add(Color.YELLOW);
         colors.add(Color.RED);
-        colors.add(Color.BLUE);
-        colors.add(Color.BLACK);
+//        colors.add(Color.BLUE);
+//        colors.add(Color.BLACK);
         mCircle.setData(baifenbi,colors);
         ViewParent viewParent = mainLayout.getParent();
         Log.i("TAG", "the parent of mainLayout is " + viewParent);

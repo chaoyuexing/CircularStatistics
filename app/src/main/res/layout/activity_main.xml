@@ -9,7 +9,7 @@
     <com.view.Circle
         android:id="@+id/mCircle"
         android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_height="200dp"
         android:paddingTop="20dp"
         app:circle_size="20dp"
         android:clickable="true"/>
