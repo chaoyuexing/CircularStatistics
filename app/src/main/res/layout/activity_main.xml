@@ -6,15 +6,32 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.view.Circle
-        android:id="@+id/mCircle"
-        android:layout_width="300dp"
-        android:layout_height="200dp"
-        android:paddingTop="20dp"
-        app:circle_size="20dp"
-        android:clickable="true"/>
 
-        <!--app:circle_color= "#165"-->
+    <Button
+        android:id="@+id/start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="开始" />
+
+    <Button
+        android:id="@+id/run"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="结束" />
+
+    <Button
+        android:id="@+id/join"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="暂停" />
+
+    <Button
+        android:id="@+id/wait"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="锁定" />
+
+    <!--app:circle_color= "#165"-->
         <!--app:text="林志玲"-->
 
         <!--app:arc_Color="#FF07F21E"-->

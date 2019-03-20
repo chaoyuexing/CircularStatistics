@@ -5,7 +5,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewParent;
+import android.widget.Button;
 import android.widget.LinearLayout;
 
 import java.util.ArrayList;
@@ -17,37 +19,91 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Integer> baifenbi = new ArrayList<>();
     private ArrayList<Integer> colors = new ArrayList<>();
     private String TAG = MainActivity.class.getSimpleName();
+    private boolean isRun = true;
+
+    private Thread thread;
+    private Button start;
+    private Button run;
+    private Button join;
+    private Button wait;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        DisplayMetrics metrics = new DisplayMetrics();
-        this.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        // 屏幕的分辨率
-        int width = metrics.widthPixels;
-        int height = metrics.heightPixels;
-        Log.e(TAG, "width: "+ width);
-        Log.e(TAG, "height: "+ height);
+        start = findViewById(R.id.start);
+        run = findViewById(R.id.run);
+        join = findViewById(R.id.join);
+        wait = findViewById(R.id.wait);
+        thread = new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                int i = 0;
+                while (isRun){
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    Log.i(TAG, "run: "+i);
+                    i++;
+                    interrupt();
+                }
+            }
+        };
+        start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                thread.start();
+                isRun = true;
+            }
+        });
 
-        mainLayout = findViewById(R.id.main_layout);
-        mCircle = findViewById(R.id.mCircle);
-        baifenbi.add(40);
-        baifenbi.add(30);
-//        baifenbi.add(20);
-//        baifenbi.add(10);
-        colors.add(Color.YELLOW);
-        colors.add(Color.RED);
-//        colors.add(Color.BLUE);
-//        colors.add(Color.BLACK);
-        mCircle.setData(baifenbi,colors);
-        ViewParent viewParent = mainLayout.getParent();
-        Log.i("TAG", "the parent of mainLayout is " + viewParent);
+        run.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isRun = false;
+            }
+        });
+
+        join.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    thread.join(3);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        wait.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    synchronized(this) {
+                        thread.wait();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
     }
 
 
     // 圆形统计图      %比，颜色，名字
 
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.e(TAG, "onDestroy: " );
+        isRun = false;
+        thread.run();
+        thread.stop();
+    }
 }
