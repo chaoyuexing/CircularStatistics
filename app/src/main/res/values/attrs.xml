@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="Circle">
-        <attr name="circle_size" format="dimension"/>
+        <attr name="circleSize" format="dimension"/>
+        <attr name="circleRadiusSize" format="dimension"/>
+        <attr name="textSize" format="dimension"/>
+        <attr name="textColor" format="color"/>
+        <attr name="fill" format="boolean"/>
     </declare-styleable>
 
 

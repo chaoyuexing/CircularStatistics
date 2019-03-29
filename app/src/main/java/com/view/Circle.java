@@ -16,26 +16,32 @@ import java.util.ArrayList;
 
 public class Circle extends View {
 
-    private String TAG = Circle.class.getName();
-    private float startAngle = 0; // 默认起点角度为0
-    private float sweepAngle = 0;
-    private int roundAngle = 360;
+    private final String TAG = Circle.class.getName();
+    private final float DEFAULT_TIP_NAME_SIZE = 34f;
+    private final float DEFAULT_RADIUS = 0;
+    private final float DEFAULT_CIRCLE_SIZE = 10;
+    private final boolean DEFAULT_FILL_MODE = true;
+    private final int DEFAULT_TEXT_COLOR = Color.BLACK;
+
+    private final float roundAngle = 360f;
     private RectF mRectF;
-    private float circleSize;
+    private float circleSize;// 统计图宽度
     private float left;
     private float right;
     private float top;
     private float bottom;
     private float radius; // 半径
-
-
-
-    private float strokeWidth = 10f;
-
+    private float tipNameSize;  //提示文字的大小
+    private Paint linePaint; //提示线条画笔
+    private Paint textPaint;
+    private boolean fillMode; // true 为填充，false为圆环
+    private int textColor;
 
     private ArrayList<Integer> mPercentage;
     private ArrayList<Integer> mColors;
     private ArrayList<Paint> mPaints = new ArrayList<>();
+    private ArrayList<String> names = new ArrayList<>();
+
 
     public Circle(Context context) {
         super(context);
@@ -45,8 +51,13 @@ public class Circle extends View {
         super(context, attrs);
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.Circle);
         if (ta != null) {
-            circleSize = ta.getDimension(R.styleable.Circle_circle_size,10);
+            circleSize = ta.getDimension(R.styleable.Circle_circleSize, DEFAULT_CIRCLE_SIZE);
+            radius = ta.getDimension(R.styleable.Circle_circleRadiusSize, DEFAULT_RADIUS);
+            tipNameSize = ta.getDimension(R.styleable.Circle_textSize, DEFAULT_TIP_NAME_SIZE);
+            fillMode = ta.getBoolean(R.styleable.Circle_fill, DEFAULT_FILL_MODE);
+            textColor = ta.getColor(R.styleable.Circle_textSize,DEFAULT_TEXT_COLOR);
         }
+        ta.recycle();
     }
 
 
@@ -64,7 +75,7 @@ public class Circle extends View {
      * @param percentage 百分比数组
      */
     public void setData(ArrayList<Integer> percentage) {
-        if (percentage != null && percentage.size() > 0) {
+        if (isListNull(percentage)) {
             this.mPercentage = percentage;
         } else {
             Log.e(TAG, "percentage is null or length = 0 ");
@@ -78,8 +89,7 @@ public class Circle extends View {
      * @param colors     颜色数组 按照数组的下标对应
      */
     public void setData(ArrayList<Integer> percentage, ArrayList<Integer> colors) {
-        Log.e(TAG, "setData: " );
-        if (percentage != null && percentage.size() > 0 && colors != null && colors.size() > 0) {
+        if (isListNull(percentage) && isListNull(colors)) {
             this.mPercentage = percentage;
             this.mColors = colors;
         } else {
@@ -94,35 +104,54 @@ public class Circle extends View {
      * @param colors     颜色数组 按照数组的下标对应
      * @param names      名字
      */
-    public void setData(int[] percentage, int[] colors, String[] names) {
-
+    public void setData(ArrayList<Integer> percentage, ArrayList<Integer> colors, ArrayList<String> names) {
+        if (isListNull(percentage) && isListNull(colors) && isListNull(names)) {
+            this.mPercentage = percentage;
+            this.mColors = colors;
+            this.names = names;
+        } else {
+            Log.e(TAG, "percentage or color is null or length = 0 ");
+        }
 
     }
 
     private void init() {
         Log.e(TAG, "init: ");
-//        DisplayMetrics displayMetrics = this.getResources().getDisplayMetrics();
         int width = getWidth();
         int height = getHeight();
+        // 如果用户没有输入圆的半径 就默认让其居中
         int length = Math.min(width, height);
-        left = circleSize + getPaddingLeft();
-        top = circleSize + getPaddingBottom();
-        right = length - getPaddingRight() - circleSize;
-        bottom = length - getPaddingBottom() - circleSize;
-//        Log.e(TAG, "length: "+ length);
-        Log.e(TAG, "left: "+ left);
-        Log.e(TAG, "top: "+ top);
-        Log.e(TAG, "right: "+ right);
-        Log.e(TAG, "bottom: "+ bottom);
-        radius = (right - left) / 2;
-        mRectF = new RectF(left  , top , right, bottom);
+        if (radius == 0) {
+            top = circleSize + getPaddingBottom();
+            left = circleSize + getPaddingLeft() + (width - height) / 2;
+            right = left + length - circleSize - getPaddingRight();
+            bottom = top + length - circleSize - getPaddingBottom();
+            radius = (right - left) / 2;
+        } else {
+            float diameter = radius * 2;
+            top = circleSize + (height - diameter) / 2 + getPaddingBottom();
+            left = circleSize + (width - diameter) / 2 + getPaddingBottom();
+            bottom = top + diameter;
+            right = left + diameter;
+        }
+
+        mRectF = new RectF(left, top, right, bottom);
         for (int i = 0; i < this.mPercentage.size(); i++) {
             Paint mArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             mArcPaint.setColor(this.mColors.get(i));
-            mArcPaint.setStyle(Paint.Style.STROKE);
+            mArcPaint.setStyle(fillMode ? Paint.Style.FILL : Paint.Style.STROKE);
             mArcPaint.setStrokeWidth(circleSize);
             mPaints.add(mArcPaint);
         }
+
+        linePaint = new Paint();
+        linePaint.setStyle(Paint.Style.FILL);
+        linePaint.setColor(Color.BLACK);
+        linePaint.setStrokeWidth(10);
+
+        textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        textPaint.setColor(textColor);
+        textPaint.setTextSize(tipNameSize);
     }
 
     @Override
@@ -130,12 +159,7 @@ public class Circle extends View {
         super.onDraw(canvas);
         Log.e(TAG, "onDraw: ");
         init();
-        Paint paint = new Paint();
-        paint.setColor(Color.GREEN);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(2);
-        canvas.drawCircle(radius + circleSize,radius + circleSize,6,paint);
-        try{
+        try {
             drawSth(canvas);
         } catch (Exception e) {
             e.printStackTrace();
@@ -143,25 +167,65 @@ public class Circle extends View {
     }
 
     private void drawSth(Canvas canvas) {
+        float startAngle = 0; // 默认起点角度为0
+        float sweepAngle;
         Log.e(TAG, "drawSth: ");
         for (int i = 0; i < mPaints.size(); i++) {
-            sweepAngle = (mPercentage.get(i).floatValue() / 100 * roundAngle);
-            Log.e(TAG, "startAngle: "+startAngle);
-            Log.e(TAG, "sweepAngle: "+sweepAngle);
-            float x1 = (float) (radius + circleSize + radius * Math.cos((sweepAngle/2 + startAngle) * Math.PI/180));
-            float y1 = (float) (radius + circleSize + radius * Math.sin((sweepAngle/2 + startAngle) * Math.PI/180));
-//            Log.e(TAG, "drawSth  i: "+ i+",y"+ y);
-//            Log.e(TAG, "drawSth  i: "+ i+",x"+ x);
-            Paint paint = new Paint();
-            paint.setColor(Color.GREEN);
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(2);
-            canvas.drawArc(mRectF, startAngle, sweepAngle, false, mPaints.get(i));
-            canvas.drawCircle(x1 ,y1,6,paint);
-//            canvas.drawLine(x1,y1,x1+50,y1+50,paint);
-//            canvas.drawLine(x1+50,y1+50,x1+250,y1+50,paint);
+            sweepAngle = (mPercentage.get(i).floatValue() / 100f * roundAngle);
+            canvas.drawArc(mRectF, startAngle, sweepAngle, fillMode, mPaints.get(i));
+            if (fillMode) {
+                showTip(startAngle, sweepAngle, canvas, names.get(i));
+            } else {
+                showLineTip(startAngle, sweepAngle, canvas, names.get(i));
+            }
             startAngle += sweepAngle;
         }
+    }
+
+    /**
+     * 展示园百分比图时候提示
+     */
+    private void showTip(float startAngle, float sweepAngle,Canvas canvas,String tipName) {
+        float tipAngle = startAngle + sweepAngle / 2;
+        float x = (float) (radius+radius / 2 * Math.cos(tipAngle * Math.PI / 180)+left);    //计算文字位置坐标
+        float y = (float) (radius+ radius / 2 * Math.sin(tipAngle * Math.PI / 180)+top);
+        canvas.drawText(tipName, x, y, textPaint);
+    }
+
+    /**
+     * 展示圆环百分比图的提示
+     */
+    private void showLineTip(float startAngle, float sweepAngle, Canvas canvas, String tipName) {
+        float tipAngle = startAngle + sweepAngle / 2;
+        float x = (float) (radius + radius * Math.cos((sweepAngle / 2 + startAngle) * Math.PI / 180)) + left;
+        float y = (float) (radius + radius * Math.sin((sweepAngle / 2 + startAngle) * Math.PI / 180)) + top;
+        float stopX;
+        float stopY;
+        float hrStopX;
+        if (tipAngle < 90) {
+            stopX = x + (radius / 2);
+            stopY = y + (radius / 2);
+            hrStopX = stopX + radius;
+        } else if (tipAngle > 90 && tipAngle < 180) {
+            stopX = x - (radius / 2);
+            stopY = y + (radius / 2);
+            hrStopX = stopX - radius;
+        } else if (tipAngle > 180 && tipAngle < 270) {
+            stopX = x - (radius / 2);
+            stopY = y - (radius / 2);
+            hrStopX = stopX - radius;
+        } else {
+            stopX = x + (radius / 2);
+            stopY = y - (radius / 2);
+            hrStopX = stopX + radius;
+        }
+        canvas.drawLine(x, y, stopX, stopY, linePaint);
+        canvas.drawLine(stopX, stopY, hrStopX, stopY, linePaint);
+        canvas.drawText(tipName, stopX, stopY - 10, textPaint);
+    }
+
+    private boolean isListNull(ArrayList list) {
+        return list != null && list.size() > 0;
     }
 
 
